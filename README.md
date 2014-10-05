@@ -12,13 +12,24 @@ A small javascript library to create radial progress bar with the following feat
 ###Usage###
 
 
-    Radial.radial(element, vals)
+    Radial.radial(element, bars, options)
     
   - element: '#id', '.class', ...
   
-  - vals: array of objects to set initial value and options for each bar
+  - bars: array of objects to set initial value and options for each bar
+
+  [
+  	{val: 0, fill: "1bc480"}, 
+	{val: 0, fill: "#ffb023", thickness: 20},
+	{val: 0, stroke: "#2a62c0", 'stroke-width': 2, stacked: false, thickness: 34}
+  ]
+
+  - options: 
+  	- startAngle: Start point of the base progress in degree (zero point is located on 12:00)
+  	- endAngle: End point of the base progress
+  	- thickness: Thickness of the base progress (all bars inherit this value, unless override it)
+  	
+  {startAngle: 220, endAngle: 500, thickness: 35}
   
-  [{val: 0.5, stroke: '#ff0000', 'stroke-width': 2, stacked: false},
-  {val: 0.2, fill: '#00ff00'}]
 
 Take a look at demo.html
