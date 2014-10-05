@@ -14,15 +14,23 @@
 <script src="js/radial-progress.js"></script>
 <script>
 	var rad = Radial.radial('#progress',
-			[{val: 0, stroke: "#2a62c0", 'stroke-width': 2, stacked: false},
-			{val: 0, fill: "1bc480"}, {val: 0, fill: "#ffb023"}],
-			{startAngle: 0.65, endAngle: 1.35});
-	rad.update([0.5, 0.2, 0.2]);
+		[
+			{val: 0, fill: "1bc480"}, 
+			{val: 0, fill: "#ffb023", thickness: 20},
+			{val: 0, stroke: "#2a62c0", 'stroke-width': 2, stacked: false, thickness: 34}
+		],
+		{
+			startAngle: 220, 
+			endAngle: 500,
+			thickness: 35
+		});
+
+	rad.update([0.2, 0.2, 0.5]);
 	setInterval(function() {
 		var total = Math.random();
 		var first = Math.random() * total;
 		var second = Math.random() * (total - first);
-		rad.update([total, first, second]);
+		rad.update([first, second, total]);
 	}, 2000);
 </script>
 

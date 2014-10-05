@@ -1,14 +1,15 @@
 Radial = {
 radial: function(element, bars, options) {
   
-    var width = options.width || $(element).width(),
+    var twoPi = 2 * Math.PI,
+        width = options.width || $(element).width(),
         height = options.height || $(element).height(),
-        startAngle = options.startAngle,
-        endAngle = options.endAngle,
-        twoPi = 2 * Math.PI,
+        startAngle = options.startAngle / 360 || 0,
+        endAngle = options.endAngle / 360 || 1,
         progress = [],
         start = [],
         stacked = [],
+        arcs = [],
         formatPercent = d3.format(".0%"),
         duration = options.duration || 1000;
 
@@ -22,25 +23,42 @@ radial: function(element, bars, options) {
     var st = 0;
     var stroke = 0;
     for (var i in bars) {
-      start.push(scale(st));
-      progress.push(scale(st + bars[i].val));
-      st += bars[i].val;
       if (bars[i].stacked === false)
         stacked.push(false);
       else
         stacked.push(true);
+      var sti = stacked[i] ? st : 0;
+      start.push(scale(sti));
+      progress.push(scale(sti + bars[i].val));
+      if (stacked[i])
+        st += bars[i].val;
       if (bars[i]['stroke-width'] > stroke)
         stroke = bars[i]['stroke-width'];
+      
     }
-    
 
     var outerRad = (width < height ? width : height) / 2;
     outerRad -= stroke;
+
+    thickness = options.thickness || 0.3 * outerRad;
     
     var arc = d3.svg.arc()
       .startAngle(twoPi * startAngle)
-      .innerRadius(outerRad * 0.7)
+      .innerRadius(outerRad - thickness)
       .outerRadius(outerRad);
+
+    for (var i in bars) {
+      arcs.push(arc);
+      if (bars[i].thickness) {
+        arcs[i] = d3.svg.arc()
+        .startAngle(twoPi * startAngle)
+        .innerRadius(outerRad - (thickness - bars[i].thickness) / 2 - bars[i].thickness)
+        .outerRadius(outerRad - (thickness - bars[i].thickness) / 2);
+      }
+    }
+    
+
+    
 
     var svg = d3.select(element).append("svg")
         .attr("width", width)
@@ -80,8 +98,9 @@ radial: function(element, bars, options) {
   update: function(vals) {
       var total = 0;
       for (var i in vals) {
-        var newStart = scale(total);
-        var newProgress = scale(total + vals[i]);
+        var sti = stacked[i] ? total : 0;
+        var newStart = scale(sti);
+        var newProgress = scale(sti + vals[i]);
         var start_ip = d3.interpolate(start[i], newStart);
         var progress_ip = d3.interpolate(progress[i], newProgress);
         //console.log('S: ' + start[i] + " , " + newStart);
@@ -89,11 +108,10 @@ radial: function(element, bars, options) {
 
         var func = function() {
           var self = this;
-          console.log(self);
           return function(t) {
             var s = self.start_ip(t);
             var p = self.progress_ip(t);
-            foregrounds[self.i].attr("d", arc.startAngle(twoPi * s).endAngle(twoPi * p));
+            foregrounds[self.i].attr("d", arcs[self.i].startAngle(twoPi * s).endAngle(twoPi * p));
             if (t == 1) {
               progress[self.i] = self.newProgress;
               start[self.i] = self.newStart;
